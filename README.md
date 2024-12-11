@@ -19,7 +19,8 @@ Link: [https://www.anaconda.com/download]
 * seaborn (for better visualizations, optional)
 * datetime (Python built-in library, no installation needed)
 
-###Recomendation
+>[!NOTE]
+Recomendation
 * Create a virtual environment in order to prevent any version conflicts with another dependencies that you had previously install.
   
 ```
