@@ -1,55 +1,67 @@
 import pandas as pd
-import seaborn as sns
-import matplotlib.pyplot as plt
 from sklearn.cluster import KMeans
 from sklearn.ensemble import RandomForestRegressor
 from sklearn.preprocessing import StandardScaler
 from sklearn.model_selection import train_test_split
 from sklearn.metrics import mean_absolute_error, mean_squared_error, confusion_matrix, classification_report
 from datetime import datetime
+import seaborn as sns
+import matplotlib.pyplot as plt
 
-# Ruta del archivo CSV
+# Cargar los datos desde el archivo proporcionado
 file_path = 'PassengersAffluency.csv'
-
-# Cargar los datos
 data = pd.read_csv(file_path)
 
-# Crear una nueva columna 'data_dte' combinando 'Year' y 'Month'
-data['data_dte'] = pd.to_datetime(data[['Year', 'Month']].assign(DAY=1), errors='coerce')
+# Limpiar columnas irrelevantes o vacías
+data = data.drop(columns=['Unnamed: 9'], errors='ignore')
 
-# Eliminar filas con fechas inválidas
-data = data[data['data_dte'].notna()]
+# Asegurarse de que las columnas necesarias sean numéricas
+data['OcupancyPercentage'] = pd.to_numeric(data['OcupancyPercentage'], errors='coerce')
 
-# Selección de características para KMeans (usamos 'Month', 'Year' y 'Total')
-features = data[['Month', 'Year', 'Total']].dropna()  # Eliminar filas con valores nulos
+# Si la columna Concurrence es categórica, convertirla a variables dummy
+if data['Concurrence'].dtype == 'object':
+    data = pd.get_dummies(data, columns=['Concurrence'], prefix='Concurrence')
 
-# Normalización de las características
+# Imprimir diagnóstico inicial
+print("Datos cargados, primeras filas:")
+print(data.head())
+
+# Eliminar filas con valores faltantes en las columnas relevantes
+features = data[['Month', 'Year', 'Total'] + [col for col in data.columns if 'Concurrence_' in col] + ['OcupancyPercentage']]
+print("Número de filas antes de dropna:", features.shape[0])
+features = features.dropna()
+print("Número de filas después de dropna:", features.shape[0])
+
+# Verificar si el DataFrame está vacío
+if features.empty:
+    raise ValueError("El DataFrame 'features' está vacío después de aplicar dropna. Verifica los datos de entrada.")
+
+# Normalizar las características
 scaler = StandardScaler()
 features_scaled = scaler.fit_transform(features)
 
-# Aplicar KMeans (n_clusters=3 para baja, moderada, alta afluencia)
+# Aplicar KMeans con 3 clústeres (baja, moderada, alta afluencia)
 kmeans = KMeans(n_clusters=3, random_state=42)
 data['Cluster'] = kmeans.fit_predict(features_scaled)
 
-# Preparar datos para Random Forest
-rf_features = data[['Month', 'Year', 'Cluster']]  # Características
+# Preparar datos para Random Forest, ahora incluyendo 'Concurrence' y 'OcupancyPercentage'
+rf_features = data[['Month', 'Year', 'Cluster'] + [col for col in data.columns if 'Concurrence_' in col] + ['OcupancyPercentage']]
 target = data['Total']  # Etiqueta
 
-# Dividir los datos en entrenamiento y prueba
+# Dividir los datos en conjuntos de entrenamiento y prueba
 X_train, X_test, y_train, y_test = train_test_split(rf_features, target, test_size=0.2, random_state=42)
 
 # Entrenar el modelo Random Forest
 model_rf = RandomForestRegressor(n_estimators=100, random_state=42)
 model_rf.fit(X_train, y_train)
 
-# Realizar predicciones
+# Realizar predicciones y calcular métricas de desempeño
 y_pred = model_rf.predict(X_test)
-
-# Evaluar el modelo
 mae = mean_absolute_error(y_test, y_pred)
 mse = mean_squared_error(y_test, y_pred)
 rmse = mse ** 0.5
 
+# Imprimir resultados de las métricas
 print(f"MAE: {mae}")
 print(f"MSE: {mse}")
 print(f"RMSE: {rmse}")
@@ -100,8 +112,8 @@ plt.legend()
 plt.show()
 
 # Predicción para una fecha futura
-future_date = datetime(2024, 12, 25)  # Fecha futura
-future_airport = 'JFK'  # Aeropuerto seleccionado
+future_date = datetime(1990, 1, 22)  # Fecha futura
+future_airport = 'DTW'  # Aeropuerto seleccionado
 
 # Ejemplo de capacidad por aeropuerto
 airport_capacity = {
@@ -118,7 +130,9 @@ future_capacity = airport_capacity.get(future_airport, 50000)  # Valor por defec
 future_features = pd.DataFrame({
     'Month': [future_date.month],
     'Year': [future_date.year],
-    'Cluster': [kmeans.predict(scaler.transform([[future_date.month, future_date.year, 0]]))[0]]  # Predicción de cluster
+    'Cluster': [kmeans.predict(scaler.transform([[future_date.month, future_date.year, 0] + [0] * len([col for col in data.columns if 'Concurrence_' in col]) + [0]]))[0]],
+    **{col: [0] for col in [col for col in data.columns if 'Concurrence_' in col]},
+    'OcupancyPercentage': [0]  # Ajustar según valores futuros esperados
 })
 
 predicted_passengers = model_rf.predict(future_features)
