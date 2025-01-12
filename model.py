@@ -111,11 +111,7 @@ plt.title('Distribución de Valores Reales y Predichos')
 plt.legend()
 plt.show()
 
-# Predicción para una fecha futura
-future_date = datetime(1990, 1, 22)  # Fecha futura
-future_airport = 'DTW'  # Aeropuerto seleccionado
-
-# Ejemplo de capacidad por aeropuerto
+# Definir capacidades por aeropuerto
 airport_capacity = {
     'LGA': 50000,  # Capacidad de LGA
     'JFK': 60000,  # Capacidad de JFK
@@ -123,10 +119,22 @@ airport_capacity = {
     # Agregar las capacidades de otros aeropuertos
 }
 
-# Obtener la capacidad del aeropuerto seleccionado
-future_capacity = airport_capacity.get(future_airport, 50000)  # Valor por defecto
+# Solicitar datos al usuario
+print("=== Predicción de Afluencia de Pasajeros ===")
+date_input = input("Introduce la fecha futura en formato YYYY-MM-DD: ")
+future_airport = input("Introduce el código del aeropuerto (ejemplo: LGA, JFK, DTW): ").strip().upper()
 
-# Predecir la afluencia de pasajeros para esa fecha
+# Validar y convertir la fecha ingresada
+try:
+    future_date = datetime.strptime(date_input, "%Y-%m-%d")
+except ValueError:
+    print("La fecha introducida no es válida. Usa el formato YYYY-MM-DD.")
+    exit()
+
+# Obtener la capacidad del aeropuerto seleccionado
+future_capacity = airport_capacity.get(future_airport, 50000)  # Valor por defecto si no está en el diccionario
+
+# Construir las características para la predicción
 future_features = pd.DataFrame({
     'Month': [future_date.month],
     'Year': [future_date.year],
@@ -135,9 +143,10 @@ future_features = pd.DataFrame({
     'OcupancyPercentage': [0]  # Ajustar según valores futuros esperados
 })
 
+# Realizar la predicción
 predicted_passengers = model_rf.predict(future_features)
 
-# Clasificación de la afluencia según la capacidad del aeropuerto
+# Clasificar la afluencia según la capacidad
 if predicted_passengers > future_capacity * 0.8:
     afluencia = 'Alta'
 elif predicted_passengers > future_capacity * 0.5:
@@ -145,4 +154,5 @@ elif predicted_passengers > future_capacity * 0.5:
 else:
     afluencia = 'Baja'
 
-print(f"La afluencia esperada para {future_date.date()} en el aeropuerto {future_airport} es: {afluencia}")
+# Mostrar el resultado
+print(f"\nLa afluencia esperada para {future_date.date()} en el aeropuerto {future_airport} es: {afluencia}")
