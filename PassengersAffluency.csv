@@ -1,4 +1,4 @@
-Year,Month,usg_apt,Total,JFKCapacity,DTWCapacity,SFOCapacity,Concurrencia,OcupancyPercentage,
+Year,Month,usg_apt,Total,JFKCapacity,DTWCapacity,SFOCapacity,Concurrence,OcupancyPercentage,
 1990,1,DTW,31933,62440306,31453486,50196094,Bajo,0.101524518,
 1990,2,DTW,38216,,,,Bajo,0.121500046,
 1990,3,DTW,30241,,,,Bajo,0.096145146,
