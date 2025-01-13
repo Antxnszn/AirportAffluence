@@ -113,18 +113,18 @@ plt.show()
 
 # Definir capacidades por aeropuerto
 airport_capacity = {
-    'LGA': 50000,  # Capacidad de LGA
+    'DTW': 50000,  # Capacidad de DTW
     'JFK': 60000,  # Capacidad de JFK
-    'DTW': 55000,  # Capacidad de DTW
+    'SFO': 55000,  # Capacidad de SFO
     # Agregar las capacidades de otros aeropuertos
 }
 
 # Solicitar datos al usuario
 print("=== Predicción de Afluencia de Pasajeros ===")
 date_input = input("Introduce la fecha futura en formato YYYY-MM-DD: ")
-future_airport = input("Introduce el código del aeropuerto (ejemplo: LGA, JFK, DTW): ").strip().upper()
+future_airport = input("Introduce el código del aeropuerto (ejemplo: DTW, JFK, STO): ").strip().upper()
 
-# Validar y convertir la fecha ingresada
+# Validar y convertir la fecha ingresaFO
 try:
     future_date = datetime.strptime(date_input, "%Y-%m-%d")
 except ValueError:
