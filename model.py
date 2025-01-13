@@ -113,13 +113,13 @@ plt.show()
 
 # Predicción para una fecha futura
 future_date = datetime(1990, 1, 22)  # Fecha futura
-future_airport = 'DTW'  # Aeropuerto seleccionado
+future_airport = 'SFO'  # Aeropuerto seleccionado
 
 # Ejemplo de capacidad por aeropuerto
 airport_capacity = {
-    'LGA': 50000,  # Capacidad de LGA
+    'DTW': 50000,  # Capacidad de DTW
     'JFK': 60000,  # Capacidad de JFK
-    'DTW': 55000,  # Capacidad de DTW
+    'SFO': 55000,  # Capacidad de SFO
     # Agregar las capacidades de otros aeropuertos
 }
 
